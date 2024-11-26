@@ -24,3 +24,12 @@ services:
       MYSQL_USER: flask_user
       MYSQL_PASSWORD: flask_password
 
+  mysqld_exporter:
+    image: prom/mysqld-exporter
+    ports:
+      - "9104:9104"
+    environment:
+      DATA_SOURCE_NAME: "user:password@(mariadb:3306)/"
+    depends_on:
+      - mariadb
+
