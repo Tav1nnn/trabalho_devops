@@ -1,1 +1,26 @@
+version: '3.7'
+
+services:
+  flask:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - mariadb
+
+  mariadb:
+    build:
+      context: ./mariadb
+      dockerfile: Dockerfile_mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: school_db
+      MYSQL_USER: flask_user
+      MYSQL_PASSWORD: flask_password
 
