@@ -1,17 +1,6 @@
 version: '3.7'
 
 services:
-  flask:
-    build:
-      context: ./flask
-      dockerfile: Dockerfile_flask
-    ports:
-      - "5000:5000"
-    environment:
-      - FLASK_ENV=development
-    depends_on:
-      - mariadb
-
   mariadb:
     build:
       context: ./mariadb
@@ -24,12 +13,13 @@ services:
       MYSQL_USER: flask_user
       MYSQL_PASSWORD: flask_password
 
-  mysqld_exporter:
-    image: prom/mysqld-exporter
+  flask:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
     ports:
-      - "9104:9104"
+      - "5000:5000"
     environment:
-      DATA_SOURCE_NAME: "user:password@(mariadb:3306)/"
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
     depends_on:
       - mariadb
-
