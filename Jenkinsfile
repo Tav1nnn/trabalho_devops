@@ -8,6 +8,7 @@ pipeline {
                     git branch: "main", url: "https://github.com/Tav1nnn/trabalho_devops.git"
                     
                     sh 'docker-compose down -v'
+                    
                     sh 'docker-compose build'
                 }
             }
@@ -16,12 +17,18 @@ pipeline {
         stage('Start Containers & Run Tests') {
             steps {
                 script {
-                    sh 'docker-compose up -d mariadb'
-                    sh 'docker-compose up -d flask'
-                    sh 'docker-compose up -d test'
+                    sh 'docker-compose up -d mariadb flask test'
+
+                    sh '''#!/bin/bash
+                    until docker-compose exec mariadb mysqladmin --user=root --password=rootpassword --host mariadb --silent --wait=30 ping; do
+                        echo "Esperando o MariaDB ficar disponível..."
+                        sleep 5
+                    done
+                    echo "MariaDB está pronto!"
+                    '''
 
                     try {
-                        sh 'docker-compose run --rm test'  
+                        sh 'docker-compose run --rm test'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         error "Testes falharam. Pipeline interrompido."
@@ -33,9 +40,7 @@ pipeline {
         stage('Keep Application Running') {
             steps {
                 script {
-                    sh 'docker-compose up -d mariadb'
-                    sh 'docker-compose up -d flask'
-                    sh 'docker-compose up -d test'
+                    sh 'docker-compose up -d mariadb flask test'
                 }
             }
         }
