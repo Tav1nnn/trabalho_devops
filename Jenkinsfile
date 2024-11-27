@@ -20,7 +20,7 @@ pipeline {
                     sh 'docker-compose up -d mariadb flask test'
 
                     sh '''#!/bin/bash
-                    until docker-compose exec mariadb mysqladmin --user=root --password=rootpassword --host mariadb --silent --wait=30 ping; do
+                    until docker-compose exec mariadb mysqladmin --user=flask_user --password=flask_password --host mariadb --silent --wait=30 ping; do
                         echo "Esperando o MariaDB ficar disponível..."
                         sleep 5
                     done
