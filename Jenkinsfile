@@ -16,9 +16,9 @@ pipeline {
         stage('Start Containers & Run Tests') {
             steps {
                 script {
-                    sh 'docker-compose up mariadb -d'
-                    sh 'docker-compose up flask -d'
-                    sh 'docker-compose up test -d'
+                    sh 'docker-compose up mariadb'
+                    sh 'docker-compose up flask'
+                    sh 'docker-compose up test'
 
                     try {
                         sh 'docker-compose run --rm test'  
@@ -33,9 +33,9 @@ pipeline {
         stage('Keep Application Running') {
             steps {
                 script {
-                    sh 'docker-compose up mariadb -d'
-                    sh 'docker-compose up flask -d'
-                    sh 'docker-compose up test -d'
+                    sh 'docker-compose up mariadb'
+                    sh 'docker-compose up flask'
+                    sh 'docker-compose up test'
                 }
             }
         }
