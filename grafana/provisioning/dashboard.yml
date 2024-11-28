@@ -1,0 +1,11 @@
+  GNU nano 7.2                 dashboard.yml                          apiVersion: 1
+
+providers:
+  - name: 'MariaDB Dashboards'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

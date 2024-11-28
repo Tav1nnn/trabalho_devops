@@ -1,0 +1,14 @@
+ FROM grafana/grafana:latest
+
+ USER root
+
+# Certifique-se de que o diretório `provisioning/dashboards` existe
+# RUN mkdir -p /etc/grafana/provisioning/dashboards /etc/grafana/prov> RUN mkdir -p /var/lib/grafana/provisioning/dashboards /var/lib/grafa>
+
+# Copiar os arquivos para o diretório correto
+ COPY provisioning/datasource.yml /var/lib/grafana/provisioning/datas> COPY provisioning/dashboard.yml /var/lib/grafana/provisioning/dashbo> COPY dashboards/mariadb_dashboard.json /var/lib/grafana/provisioning>
+
+# Garantir permissões para o usuário grafana
+ RUN chown -R 472:472 /var/lib/grafana/provisioning
+
+ USER grafana

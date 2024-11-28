@@ -1,0 +1,32 @@
+        "title": "MariaDB Queries per Second",
+        "targets": [
+          {
+            "expr": "rate(mysql_global_status_questions[1m])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Queries per Second",
+            "refId": "B"
+          }
+        ],
+        "datasource": "Prometheus",
+        "xaxis": {
+          "show": true
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "show": true
+          },
+          {
+            "show": true
+          }
+        ]
+      }
+    ],
+    "refresh": "5s",
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    }
+  }
+}
