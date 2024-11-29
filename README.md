@@ -6,7 +6,7 @@
 - Gustavo Aparecido da Silva Ra: 23.9361-9
 - Gabriel Monteiro Ricardo Ra: 22.8636-7
 
-####  Inicio (Gabriel)
+####  Inicio
 O arquivo docker-compose.yml foi criado na raiz do projeto para configurar os contêineres necessários.
 
 ```bash
@@ -18,17 +18,6 @@ Após isso adicionei o seguinte código dentro do arquivo:
 version: '3.7'
 
 services:
-  flask:
-    build:
-      context: ./flask
-      dockerfile: Dockerfile_flask
-    ports:
-      - "5000:5000"
-    environment:
-      - FLASK_ENV=development
-    depends_on:
-      - mariadb
-
   mariadb:
     build:
       context: ./mariadb
@@ -41,16 +30,29 @@ services:
       MYSQL_USER: flask_user
       MYSQL_PASSWORD: flask_password
 
-  mysqld_exporter:
-    image: prom/mysqld-exporter
+  flask:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
     ports:
-      - "9104:9104"
+      - "5000:5000"
     environment:
-      DATA_SOURCE_NAME: "user:password@(mariadb:3306)/"
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
     depends_on:
       - mariadb
 
-
+  test:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
+    command: ["pytest", "/app/test_app.py"]  # Roda os testes no arquivo test_app.py
+    depends_on:
+      - mariadb
+      - flask
+    environment:
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
+    networks:
+      - default  # Conecta o contêiner aos mesmos serviços de rede
 ```
 
 Após, foi-se criada um novo diretório na raiz do projeto chamado flask, onde dentro criou-se o arquivo `app.py`.
@@ -88,6 +90,16 @@ appbuilder = AppBuilder(app, db.session)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Modelo de Aluno - Definição da tabela 'Aluno' no banco de dados
+class Aluno(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(50), nullable=False)
+    sobrenome = db.Column(db.String(50), nullable=False)
+    turma = db.Column(db.String(50), nullable=False)
+    disciplinas = db.Column(db.String(200), nullable=False)
+    ra = db.Column(db.String(200), nullable=False)
+
+
 # Tentar conectar até o MariaDB estar pronto
 attempts = 5
 for i in range(attempts):
@@ -114,18 +126,10 @@ for i in range(attempts):
             logger.error("Não foi possível conectar ao banco de dados após várias tentativas.")
             raise
 
-# Modelo de Aluno - Definição da tabela 'Aluno' no banco de dados
-class Aluno(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(50), nullable=False)
-    sobrenome = db.Column(db.String(50), nullable=False)
-    turma = db.Column(db.String(50), nullable=False)
-    disciplinas = db.Column(db.String(200), nullable=False)
-
 # Visão do modelo Aluno para o painel administrativo
 class AlunoModelView(ModelView):
     datamodel = SQLAInterface(Aluno)
-    list_columns = ['id', 'nome', 'sobrenome', 'turma', 'disciplinas']
+    list_columns = ['id', 'nome', 'sobrenome', 'turma', 'disciplinas', 'ra']
 
 # Adicionar a visão do modelo ao AppBuilder
 appbuilder.add_view(
@@ -139,14 +143,14 @@ appbuilder.add_view(
 @app.route('/alunos', methods=['GET'])
 def listar_alunos():
     alunos = Aluno.query.all()
-    output = [{'id': aluno.id, 'nome': aluno.nome, 'sobrenome': aluno.sobrenome, 'turma': aluno.turma, 'disciplinas': aluno.disciplinas} for aluno in alunos]
+    output = [{'id': aluno.id, 'nome': aluno.nome, 'sobrenome': aluno.sobrenome, 'turma': aluno.turma, 'disciplinas': aluno.disciplinas, 'ra': aluno.ra} for aluno in alunos]
     return jsonify(output)
 
 # Rota para adicionar um aluno - Método POST
 @app.route('/alunos', methods=['POST'])
 def adicionar_aluno():
     data = request.get_json()
-    novo_aluno = Aluno(nome=data['nome'], sobrenome=data['sobrenome'], turma=data['turma'], disciplinas=data['disciplinas'])
+    novo_aluno = Aluno(nome=data['nome'], sobrenome=data['sobrenome'], turma=data['turma'], disciplinas=data['disciplinas'], ra=data['ra'])
     db.session.add(novo_aluno)
     db.session.commit()
     logger.info(f"Aluno {data['nome']} {data['sobrenome']} adicionado com sucesso!")
@@ -154,7 +158,6 @@ def adicionar_aluno():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
 ```
 
 Após adicionei nossas dependencias da aplicação por meio do arquivo requirements, este ficou dentro da pasta flask também.
@@ -173,7 +176,9 @@ Werkzeug==1.0.1  # Versão compatível do Werkzeug para evitar erros de importa�
 MarkupSafe==2.0.1  # Versão compatível com Jinja2 e Flask
 WTForms==2.3.3  # Versão compatível com Flask-AppBuilder que contém o módulo 'compat'
 prometheus-flask-exporter==0.18.3
-
+pytest==6.2.5
+pytest-flask==1.2.0
+Flask-Testing==0.8.0
 ```
 Após criei o Dockerfile_flask dentro da pasta flask também, ele vai determinar o diretorio de trabalho e rodar a instalação das dependencias
 
@@ -232,3 +237,18 @@ docker-compose up --build
 - Ao confeir no navegador o localhost:5000 obitive a resultado correto:
 
 ![alt text](images/image.png)
+
+#### Jenkins
+Nesta parte, criamos uma nova tarefa no Jenkins, que será utilizada para gerenciar o pipeline do projeto "trabalho devops". Primeiro, inserimos o nome do item, no caso "trabalho devops". Em seguida, selecionamos o tipo de tarefa como Pipeline, que é ideal para projetos que demandam a execução de atividades complexas e sequenciais, como o fluxo de integração e entrega contínua (CI/CD). Depois de selecionar o tipo de tarefa, clicamos no botão "Tudo certo" para prosseguir com a configuração do pipeline.
+
+![alt text](images/1.jpg)
+
+Em seguida, configuramos o pipeline no Jenkins para conectar ao repositório Git onde está armazenado o código do projeto "trabalho devops".
+
+
+No campo SCM, selecionamos Git como o sistema de controle de versão.
+No campo Repository URL, inserimos o link para o repositório do GitHub: https://github.com/Tav1nn/trabalho_devops.git.
+Como não foram configuradas credenciais específicas, deixamos o campo Credentials como - none -. Caso o repositório fosse privado, seria necessário adicionar credenciais para autenticação.
+No campo Branches to build, especificamos a branch que será usada para as builds, no caso */main. Isso indica que o pipeline será executado na branch principal.
+
+![alt text](images/2.jpg)
