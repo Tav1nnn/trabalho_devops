@@ -1,10 +1,50 @@
-        "title": "MariaDB Queries per Second",
+{
+  "dashboard": {
+    "id": null,
+    "title": "Advanced MariaDB Dashboard",
+    "tags": ["mariadb", "database", "advanced"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "10s",
+    "time": {
+      "from": "now-30m",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "type": "graph",
+        "title": "Threads Connected",
+        "targets": [
+          {
+            "expr": "mysql_global_status_threads_connected",
+            "format": "time_series",
+            "legendFormat": "Threads Connected",
+            "refId": "A"
+          }
+        ],
+        "datasource": "Prometheus",
+        "xaxis": {
+          "show": true
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "show": true
+          },
+          {
+            "show": true
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Queries per Second",
         "targets": [
           {
             "expr": "rate(mysql_global_status_questions[1m])",
             "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "Queries per Second",
+            "legendFormat": "Queries/s",
             "refId": "B"
           }
         ],
@@ -21,12 +61,139 @@
             "show": true
           }
         ]
+      },
+      {
+        "type": "graph",
+        "title": "Slow Queries",
+        "targets": [
+          {
+            "expr": "mysql_global_status_slow_queries",
+            "format": "time_series",
+            "legendFormat": "Slow Queries",
+            "refId": "C"
+          }
+        ],
+        "datasource": "Prometheus",
+        "xaxis": {
+          "show": true
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "show": true
+          },
+          {
+            "show": true
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Table Locks",
+        "targets": [
+          {
+            "expr": "rate(mysql_global_status_table_locks_waited[1m])",
+            "format": "time_series",
+            "legendFormat": "Table Locks Waited",
+            "refId": "D"
+          }
+        ],
+        "datasource": "Prometheus",
+        "xaxis": {
+          "show": true
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "show": true
+          },
+          {
+            "show": true
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Buffer Pool Usage",
+        "targets": [
+          {
+            "expr": "mysql_global_variables_innodb_buffer_pool_size",
+            "format": "time_series",
+            "legendFormat": "Buffer Pool Size",
+            "refId": "E"
+          },
+          {
+            "expr": "mysql_global_status_innodb_buffer_pool_bytes_data",
+            "format": "time_series",
+            "legendFormat": "Buffer Pool Data",
+            "refId": "F"
+          }
+        ],
+        "datasource": "Prometheus",
+        "xaxis": {
+          "show": true
+        },
+        "yaxes": [
+          {
+            "format": "bytes",
+            "show": true
+          },
+          {
+            "show": true
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Connections",
+        "targets": [
+          {
+            "expr": "rate(mysql_global_status_connections[1m])",
+            "format": "time_series",
+            "legendFormat": "Connections/s",
+            "refId": "G"
+          }
+        ],
+        "datasource": "Prometheus",
+        "xaxis": {
+          "show": true
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "show": true
+          },
+          {
+            "show": true
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Aborted Connections",
+        "targets": [
+          {
+            "expr": "rate(mysql_global_status_aborted_connects[1m])",
+            "format": "time_series",
+            "legendFormat": "Aborted Connections",
+            "refId": "H"
+          }
+        ],
+        "datasource": "Prometheus",
+        "xaxis": {
+          "show": true
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "show": true
+          },
+          {
+            "show": true
+          }
+        ]
       }
-    ],
-    "refresh": "5s",
-    "time": {
-      "from": "now-15m",
-      "to": "now"
-    }
+    ]
   }
 }
+
