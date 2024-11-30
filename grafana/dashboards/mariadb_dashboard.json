@@ -1,199 +1,192 @@
 {
-  "dashboard": {
-    "id": null,
-    "title": "Advanced MariaDB Dashboard",
-    "tags": ["mariadb", "database", "advanced"],
-    "timezone": "browser",
-    "schemaVersion": 16,
-    "version": 0,
-    "refresh": "10s",
-    "time": {
-      "from": "now-30m",
-      "to": "now"
+  "uid": "simple_dashboard",
+  "title": "Dashboard Banco de Dados DevOps",
+  "tags": ["Banco de Dados", "DevOps"],
+  "timezone": "browser",
+  "schemaVersion": 16,
+  "version": 2,
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Prometheus Node Status",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "up",
+          "legendFormat": "Node {{instance}}",
+          "refId": "A"
+        }
+      ],
+      "xaxis": {
+        "show": true
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "show": true
+        },
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
     },
-    "panels": [
-      {
-        "type": "graph",
-        "title": "Threads Connected",
-        "targets": [
-          {
-            "expr": "mysql_global_status_threads_connected",
-            "format": "time_series",
-            "legendFormat": "Threads Connected",
-            "refId": "A"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
-          "show": true
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
+    {
+      "type": "graph",
+      "title": "Conexões ativas do MariaDB",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
       },
-      {
-        "type": "graph",
-        "title": "Queries per Second",
-        "targets": [
-          {
-            "expr": "rate(mysql_global_status_questions[1m])",
-            "format": "time_series",
-            "legendFormat": "Queries/s",
-            "refId": "B"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
-          "show": true
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
+      "targets": [
+        {
+          "expr": "mysql_global_status_threads_connected",
+          "legendFormat": "Conexões ativas",
+          "refId": "B"
+        }
+      ],
+      "xaxis": {
+        "show": true
       },
-      {
-        "type": "graph",
-        "title": "Slow Queries",
-        "targets": [
-          {
-            "expr": "mysql_global_status_slow_queries",
-            "format": "time_series",
-            "legendFormat": "Slow Queries",
-            "refId": "C"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
+      "yaxes": [
+        {
+          "format": "short",
           "show": true
         },
-        "yaxes": [
-          {
-            "format": "short",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    },
+    {
+      "type": "graph",
+      "title": "Uso de CPU do Prometheus",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
       },
-      {
-        "type": "graph",
-        "title": "Table Locks",
-        "targets": [
-          {
-            "expr": "rate(mysql_global_status_table_locks_waited[1m])",
-            "format": "time_series",
-            "legendFormat": "Table Locks Waited",
-            "refId": "D"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
-          "show": true
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
+      "targets": [
+        {
+          "expr": "rate(process_cpu_seconds_total[1m])",
+          "legendFormat": "CPU Usage",
+          "refId": "C"
+        }
+      ],
+      "xaxis": {
+        "show": true
       },
-      {
-        "type": "graph",
-        "title": "Buffer Pool Usage",
-        "targets": [
-          {
-            "expr": "mysql_global_variables_innodb_buffer_pool_size",
-            "format": "time_series",
-            "legendFormat": "Buffer Pool Size",
-            "refId": "E"
-          },
-          {
-            "expr": "mysql_global_status_innodb_buffer_pool_bytes_data",
-            "format": "time_series",
-            "legendFormat": "Buffer Pool Data",
-            "refId": "F"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
+      "yaxes": [
+        {
+          "format": "percent",
           "show": true
         },
-        "yaxes": [
-          {
-            "format": "bytes",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    },
+    {
+      "type": "graph",
+      "title": "Uso de Memória do Prometheus",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
       },
-      {
-        "type": "graph",
-        "title": "Connections",
-        "targets": [
-          {
-            "expr": "rate(mysql_global_status_connections[1m])",
-            "format": "time_series",
-            "legendFormat": "Connections/s",
-            "refId": "G"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
-          "show": true
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
+      "targets": [
+        {
+          "expr": "rate(process_resident_memory_bytes[1m])",
+          "legendFormat": "Uso de Memória",
+          "refId": "D"
+        }
+      ],
+      "xaxis": {
+        "show": true
       },
-      {
-        "type": "graph",
-        "title": "Aborted Connections",
-        "targets": [
-          {
-            "expr": "rate(mysql_global_status_aborted_connects[1m])",
-            "format": "time_series",
-            "legendFormat": "Aborted Connections",
-            "refId": "H"
-          }
-        ],
-        "datasource": "Prometheus",
-        "xaxis": {
+      "yaxes": [
+        {
+          "format": "bytes",
           "show": true
         },
-        "yaxes": [
-          {
-            "format": "short",
-            "show": true
-          },
-          {
-            "show": true
-          }
-        ]
-      }
-    ]
-  }
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    },
+    {
+      "type": "graph",
+      "title": "Tempo de Resposta do MariaDB",
+      "datasource": "Prometheus",
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "rate(mysql_global_status_seconds_since_slow_log[1m])",
+          "legendFormat": "Tempo de Resposta (segundos)",
+          "refId": "E"
+        }
+      ],
+      "xaxis": {
+        "show": true
+      },
+      "yaxes": [
+        {
+          "format": "seconds",
+          "show": true
+        },
+        {
+          "show": true
+        }
+      ],
+      "lines": true,
+      "fill": 1,
+      "linewidth": 2,
+      "points": false,
+      "pointradius": 2
+    }
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "overwrite": true
 }
 
