@@ -12,7 +12,7 @@ O arquivo docker-compose.yml foi criado na raiz do projeto para configurar os co
 ```bash
 vim docker-compose.yml
 ```
-Após isso adicionei o seguinte código dentro do arquivo:
+Após isso adicionamos o seguinte código dentro do arquivo:
 
 ``` yml
 version: '3.7'
@@ -59,7 +59,7 @@ Após, foi-se criada um novo diretório na raiz do projeto chamado flask, onde d
 ```
 vim app.py 
 ```
-em seguinda, dentro deste adicionei o seguinte código:
+em seguinda, dentro deste adicionamos o seguinte código:
 ``` python
 # Código principal do Flask (app.py)
 import time
@@ -160,13 +160,13 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
 ```
 
-Após adicionei nossas dependencias da aplicação por meio do arquivo requirements, este ficou dentro da pasta flask também.
+Após adicionamos nossas dependencias da aplicação por meio do arquivo requirements, este ficou dentro da pasta flask também.
 
 ```bash
 vim requirements.txt
 ```
 
-e adicionei o seguinte código dentro:
+e adicionamos o seguinte código dentro:
 ```txt
 Flask==1.1.4  # Versão compatível com Flask-AppBuilder
 Flask-SQLAlchemy==2.4.4  # Extensão do Flask para integração com SQLAlchemy
@@ -204,7 +204,7 @@ CMD ["flask", "run", "--host=0.0.0.0"]
 
 ```
 
-Em seguida, configurei o banco de dados. Na raiz do projeto, criei a pasta `mariadb` e adicionei o arquivo `Dockerfile_mariadb`, responsável por definir as variáveis de ambiente necessárias para o funcionamento do projeto.
+Em seguida, configuramos o banco de dados. Na raiz do projeto, criei a pasta `mariadb` e adicionei o arquivo `Dockerfile_mariadb`, responsável por definir as variáveis de ambiente necessárias para o funcionamento do projeto.
 
 ```vim
 vim Dockerfile_mariadb
@@ -228,13 +228,13 @@ ENV MYSQL_PASSWORD=flask_password
 EXPOSE 3306
 ```
 
-- Após isso rodei o comando para subir os containres 
+- Após isso rodamos o comando para subir os containres 
 
 ```bash
 docker-compose up --build
 ```
 
-- Ao confeir no navegador o localhost:5000 obitive a resultado correto:
+- Ao confeir no navegador o localhost:5000 obitivemos a resultado correto:
 
 ![alt text](images/image.png)
 
@@ -252,6 +252,15 @@ Como não foram configuradas credenciais específicas, deixamos o campo Credenti
 No campo Branches to build, especificamos a branch que será usada para as builds, no caso */main. Isso indica que o pipeline será executado na branch principal.
 
 ![alt text](images/2.jpg)
+
+### Testes da aplicação
+Os teste da aplicação podem ser feitos através do comando:
+```bash
+  docker-compose run --rm test
+```
+
+que retorna isso:
+![alt text](image.png)
 
 ### Desenvolvimento do Grafana e Prometheus
 Adicionada as pastas grafana e prometheus aos arquivos.
