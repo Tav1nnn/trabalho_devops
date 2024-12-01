@@ -260,7 +260,7 @@ Os teste da aplicação podem ser feitos através do comando:
 ```
 
 que retorna isso:
-![alt text](image.png)
+![alt text](images/image.png)
 
 ### Desenvolvimento do Grafana e Prometheus
 Adicionada as pastas grafana e prometheus aos arquivos.
