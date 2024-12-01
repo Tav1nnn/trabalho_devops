@@ -252,3 +252,168 @@ Como não foram configuradas credenciais específicas, deixamos o campo Credenti
 No campo Branches to build, especificamos a branch que será usada para as builds, no caso */main. Isso indica que o pipeline será executado na branch principal.
 
 ![alt text](images/2.jpg)
+
+### Desenvolvimento do Grafana e Prometheus
+Adicionada as pastas grafana e prometheus aos arquivos.
+Na pasta grafana o arquivo Dockerfile_grafana fica responsável por crir a imagem Docker personalizada para o serviço Grafana. Ela define como configurar o ambiente, adicionando configurações específicas, plugins e integrações necessárias para funcionar no contexto da aplicação.
+Código:
+```  yml
+FROM grafana/grafana:latest
+
+USER root
+
+RUN mkdir /var/lib/grafana/dashboards
+
+COPY provisioning/datasource.yml /etc/grafana/provisioning/datasources/
+COPY provisioning/dashboard.yml /etc/grafana/provisioning/dashboards/
+COPY dashboards/mariadb_dashboard.json /var/lib/grafana/dashboards/
+
+RUN chown -R 472:472 /etc/grafana/provisioning
+
+USER grafana
+```
+Na pasta dashboards do grafana temos o arquivo responsável por um dashboard pré-configurado que contém a definição de painéis e métricas específicas para monitorar um banco de dados MariaDB. Ele define os painéis, métricas monitoradas e integração com datasources.
+Arquivo:
+mariadb_dashboard.json
+
+Na outra pasta, provisioning temos dois arquivos. Datasource.yml e dashboard.yml que são responsáveis por automatizar a configuração de dashboards e fontes de dados. Eles permitem que você configure essas opções automaticamente durante a inicialização do Grafana, em vez de configurá-las manualmente pela interface do usuário.
+datasource.yml
+Contém arquivos YML para configurar datasources (fontes de dados), como Prometheus, MySQL, Elasticsearch, entre outros.
+
+dashboards.yml
+Contém arquivos YML para provisionar dashboards, especificando onde estão os arquivos JSON com as definições dos dashboards.
+
+Na pasta prometheus temos o arquivo prometheus.yml que é responsável pela configuração principal do Prometheus, onde são definidas configurações para:
+1 - Fontes de coleta de métricas (targets).
+2 - Regras de scrape (frequência e comportamento da coleta).
+3 - Alertas (Alertmanager).
+4 - Configurações de armazenamento e outros parâmetros globais.
+
+Outras alterações se fizeram necessárias ao adicionar essas configurações. Alterações no docker-compose e Jenkinsfile.
+Docker-compose.yml
+``` yml
+version: "3.7"
+
+services:
+  flask:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
+    depends_on:
+      - mariadb
+
+  mariadb:
+    build:
+      context: ./mariadb
+      dockerfile: Dockerfile_mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: school_db
+      MYSQL_USER: flask_user
+      MYSQL_PASSWORD: flask_password
+
+  test:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile_flask
+    command: ["pytest", "/app/test_app.py"]
+    depends_on:
+      - mariadb
+      - flask
+    environment:
+      - DATABASE_URL=mysql+pymysql://flask_user:flask_password@mariadb:3306/school_db
+    networks:
+      - default
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - mysqld_exporter
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+  mysqld_exporter:
+    image: prom/mysqld-exporter
+    environment:
+      - DATA_SOURCE_NAME=mysql://flask_user:flask_password@mariadb:3306/school_db
+    ports:
+      - "9104:9104"
+    depends_on:
+      - mariadb
+
+  grafana:
+    build:
+      context: ./grafana
+      dockerfile: Dockerfile_grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+```
+
+Jenkinsfile
+``` yml
+pipeline {
+    agent any
+
+    stages {
+        stage('Git Pull & Build Containers') {
+            steps {
+                script {
+                    git branch: "main", url: "https://github.com/Tav1nnn/trabalho_devops.git"
+                    sh 'docker-compose down -v'
+                    sh 'docker-compose build'
+                }
+            }
+        }
+
+        stage('Start Containers & Run Tests') {
+            steps {
+                script {
+                    sh 'docker-compose up -d mariadb flask test mysqld_exporter prometheus grafana'
+                    sh 'sleep 40' 
+
+                    try {
+                        sh 'docker-compose run --rm test'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Testes falharam. Pipeline interrompido."
+                    }
+                }
+            }
+        }
+
+        stage('Keep Application Running') {
+            steps {
+                script {
+                    sh 'docker-compose up -d mariadb flask test mysqld_exporter prometheus grafana'
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            sh 'docker-compose down -v'
+        }
+    }
+}
+```
+
+Após isso tivemos o dashboard funcionando de forma automatizada a partir de métricas do prometheus.
+![image](https://github.com/user-attachments/assets/21790c33-6383-4d37-bd37-acb847e7f553)
+
+![image](https://github.com/user-attachments/assets/3bec0867-bb7d-40a9-ba43-f7fb65e2870e)
+
+
+
