@@ -6,7 +6,24 @@
 - Gustavo Aparecido da Silva Ra: 23.9361-9
 - Gabriel Monteiro Ricardo Ra: 22.8636-7
 
-####  Inicio
+## Como rodar o projeto
+
+Passo 1: Abra o Jenkins.
+
+Passo 2: Crie uma nova tarefa do tipo pipeline.
+![alt text](images/1.jpg)
+
+Passo 3: Seleciona Git no SCM, e adicione o repositório.
+`https://github.com/Tav1nnn/trabalho_devops.git`
+![alt text](images/2.jpg)
+
+Passo 4: Clique em 'Construir agora' para começar rodar o projeto.
+![alt text](images/Jenkins2.png)
+
+Passo 5: Esperar o projeto executar totalmente.
+![alt text](images/Jenkins1.png)
+
+##  Desenvolvimento do projeto
 O arquivo docker-compose.yml foi criado na raiz do projeto para configurar os contêineres necessários.
 
 ```bash
@@ -189,7 +206,6 @@ vim Dockerfile_flask
 e em seguida o seguinte código foi adicionado dentro:
 
 ``` yml
-# Dockerfile (Flask AppBuilder)
 FROM python:3.9-slim
 
 WORKDIR /app
@@ -197,8 +213,11 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-#COPY . .
+# Copiar o arquivo app.py
 COPY app.py /app/
+
+# Copiar também o arquivo de teste test_app.py
+COPY test_app.py /app/
 
 CMD ["flask", "run", "--host=0.0.0.0"]
 
@@ -236,7 +255,7 @@ docker-compose up --build
 
 - Ao confeir no navegador o localhost:5000 obitivemos a resultado correto:
 
-![alt text](images/image.png)
+![alt text](images/flask.png)
 
 #### Jenkins
 Nesta parte, criamos uma nova tarefa no Jenkins, que será utilizada para gerenciar o pipeline do projeto "trabalho devops". Primeiro, inserimos o nome do item, no caso "trabalho devops". Em seguida, selecionamos o tipo de tarefa como Pipeline, que é ideal para projetos que demandam a execução de atividades complexas e sequenciais, como o fluxo de integração e entrega contínua (CI/CD). Depois de selecionar o tipo de tarefa, clicamos no botão "Tudo certo" para prosseguir com a configuração do pipeline.
@@ -420,9 +439,9 @@ pipeline {
 ```
 
 Após isso tivemos o dashboard funcionando de forma automatizada a partir de métricas do prometheus.
-![image](https://github.com/user-attachments/assets/21790c33-6383-4d37-bd37-acb847e7f553)
+![alt text](images/grafana1.png)
 
-![image](https://github.com/user-attachments/assets/3bec0867-bb7d-40a9-ba43-f7fb65e2870e)
+![alt text](images/grafana2.png)
 
 
 
